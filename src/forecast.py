@@ -14,13 +14,13 @@ import numpy as np
 import pandas as pd
 from scipy.stats import norm
 
-from .features import make_features, MAX_HORIZON, COUNTRY
+from .features import make_features, MAX_HORIZON
 from .models import predict
 
 
 # ---------------------------------------------------------------- forecasting
 def forecast_future(history, point_model, lower_model=None, upper_model=None,
-                    horizon=30, country=COUNTRY):
+                    horizon=30):
     """Forecast `horizon` days after the last date in `history`.
 
     How it works: we add empty future rows to every series, compute features
@@ -35,7 +35,7 @@ def forecast_future(history, point_model, lower_model=None, upper_model=None,
     future["sales"] = np.nan
     # Only the last ~2.1 years are needed to compute the longest lag (728 days).
     recent = history[history["date"] > last - pd.Timedelta(days=760)]
-    full = make_features(pd.concat([recent, future], ignore_index=True), country)
+    full = make_features(pd.concat([recent, future], ignore_index=True))
     fut = full[full["date"] > last].copy()
     # Predict everything first, *then* add columns (a new column must not
     # be mistaken for a feature by the next model).

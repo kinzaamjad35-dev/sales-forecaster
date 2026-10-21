@@ -56,26 +56,4 @@ for ax, col, c, t, m in [(axes[0], "naive", GREY, "Before: copy last year's sale
 fig.suptitle("Store 1, item 1, last 90 days of 2017", color=NAVY, fontsize=11)
 plt.tight_layout(); plt.savefig("docs/before_after.png"); plt.close()
 
-# 4) Modelled Ramadan / Eid effect: mean SHAP contribution of the Islamic-calendar features
-import shap
-isl_cols = [c for c in feature_columns(feat) if "ramadan" in c or "eid" in c]
-groups = {"Normal day": (feat.ramadan_day == 0) & (feat.days_to_eid_fitr < 0) & (feat.days_to_eid_adha < 0) & (feat.is_eid_fitr == 0) & (feat.is_eid_adha == 0),
-          "Ramadan": feat.is_ramadan == 1,
-          "Week before Eid": (feat.days_to_eid_fitr > 0) | (feat.days_to_eid_adha > 0),
-          "Eid days": (feat.is_eid_fitr == 1) | (feat.is_eid_adha == 1)}
-tr = train.dropna(subset=feature_columns(feat))
-ex = shap.TreeExplainer(model); X = tr[feature_columns(feat)]; idx = [X.columns.get_loc(c) for c in isl_cols]
-eff = {}
-for g, mask in groups.items():
-    smp = X[mask.loc[X.index]].sample(min(2000, int(mask.loc[X.index].sum())), random_state=0)
-    eff[g] = float(ex.shap_values(smp)[:, idx].sum(1).mean())
-stats["holiday_effect_units"] = eff; stats["mean_daily_sales"] = float(tr.sales.mean())
-fig, ax = plt.subplots(figsize=(9, 3.6))
-bars = ax.bar(list(eff), list(eff.values()), color=[GREY, NAVY, AMBER, TEAL]); ax.axhline(0, color=NAVY, lw=.8)
-for r, v in zip(bars, eff.values()): ax.text(r.get_x() + r.get_width() / 2, v, f"{v:+.2f}", ha="center", va="bottom" if v >= 0 else "top", color=NAVY)
-ax.set_ylabel("units/day vs model baseline"); ax.grid(axis="x", visible=False)
-ax.set_title("Modelled Ramadan and Eid effect (SHAP, LightGBM)")
-ax.text(0, -0.28, f"Sample data is not Pakistani, so the learned effect is tiny (average sale = {tr.sales.mean():.1f} units/day). "
-        "Real Lahore shop data is needed to see the true effect.", transform=ax.transAxes, fontsize=8.5, color=GREY)
-plt.tight_layout(); plt.savefig("docs/ramadan_eid_effect.png", bbox_inches="tight"); plt.close()
 json.dump(stats, open("docs/readme_stats.json", "w"), indent=2); print(json.dumps(stats, indent=2))

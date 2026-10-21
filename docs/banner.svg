@@ -7,6 +7,6 @@
     points="1200,100 1240,70"/>
   <circle cx="1200" cy="100" r="8" fill="#F59E0B"/>
   <text x="80" y="150" font-family="Helvetica, Arial, sans-serif" font-size="64" font-weight="700" fill="#FFFFFF">AI Sales Forecaster</text>
-  <text x="82" y="205" font-family="Helvetica, Arial, sans-serif" font-size="26" fill="#CBD5E1">Demand forecasting and restock planning for Pakistani retailers</text>
+  <text x="82" y="205" font-family="Helvetica, Arial, sans-serif" font-size="26" fill="#CBD5E1">Demand forecasting and restock planning for retailers</text>
   <rect x="82" y="235" width="120" height="5" rx="2" fill="#0D9488"/>
 </svg>

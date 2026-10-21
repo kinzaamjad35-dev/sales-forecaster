@@ -99,20 +99,20 @@ def predict(model, df):
 
 
 # ---------------------------------------------------------------- prophet
-def _prophet_one(g, horizon_dates, holidays_df):
+def _prophet_one(g, horizon_dates):
     from prophet import Prophet
     m = Prophet(yearly_seasonality=True, weekly_seasonality=True,
-                daily_seasonality=False, holidays=holidays_df, interval_width=0.8)
+                daily_seasonality=False, interval_width=0.8)
     m.fit(g.rename(columns={"date": "ds", "sales": "y"})[["ds", "y"]])
     fc = m.predict(pd.DataFrame({"ds": horizon_dates}))
     return fc[["ds", "yhat", "yhat_lower", "yhat_upper"]]
 
 
-def prophet_forecast(train, horizon_dates, holidays_df=None, n_jobs=-1):
+def prophet_forecast(train, horizon_dates, n_jobs=-1):
     """Fit one Prophet model per store-item series (in parallel)."""
     groups = list(train.groupby(["store", "item"]))
     outs = Parallel(n_jobs=n_jobs)(
-        delayed(_prophet_one)(g[["date", "sales"]], horizon_dates, holidays_df) for _, g in groups)
+        delayed(_prophet_one)(g[["date", "sales"]], horizon_dates) for _, g in groups)
     res = []
     for (key, _), fc in zip(groups, outs):
         fc = fc.rename(columns={"ds": "date"})

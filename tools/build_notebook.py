@@ -32,7 +32,7 @@ os.makedirs(ROOT / "images", exist_ok=True); os.makedirs(ROOT / "models", exist_
 
 import numpy as np, pandas as pd, matplotlib.pyplot as plt, joblib
 from src.data import load_sales
-from src.features import make_features, feature_columns, holiday_calendar, islamic_dates, COUNTRY
+from src.features import make_features, feature_columns
 from src import models as M
 from src.forecast import detect_anomalies
 plt.rcParams.update({"figure.figsize": (12, 4), "axes.grid": True})
@@ -44,7 +44,7 @@ print(df.shape); print(df["date"].min().date(), "→", df["date"].max().date())
 print("stores:", df["store"].nunique(), "| items:", df["item"].nunique(), "| missing values:", df.isna().sum().sum())
 df.head()
 """)
-md("## 2. Explore: trend, weekday, month, holidays")
+md("## 2. Explore: trend, weekday, month, year")
 code("""
 daily = df.groupby("date")["sales"].sum()
 ax = daily.plot(alpha=.4, label="daily total")
@@ -57,13 +57,11 @@ fig, axes = plt.subplots(1, 3, figsize=(16, 4))
 wd = df.groupby(df["date"].dt.dayofweek)["sales"].mean()
 wd.index = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]; wd.plot.bar(ax=axes[0], title="Avg sales by weekday")
 df.groupby(df["date"].dt.month)["sales"].mean().plot.bar(ax=axes[1], title="Avg sales by month")
-hol = holiday_calendar(df["date"].min(), df["date"].max())
-tag = np.where(df["date"].isin(hol), "Holiday", np.where((df["date"] + pd.Timedelta(days=1)).isin(hol), "Day before", "Normal day"))
-df.groupby(tag)["sales"].mean().plot.bar(ax=axes[2], title=f"Avg sales: holidays ({COUNTRY} calendar)")
+df.groupby(df["date"].dt.year)["sales"].mean().plot.bar(ax=axes[2], title="Avg sales by year")
 plt.tight_layout(); plt.savefig(ROOT / "images" / "seasonality.png", dpi=110); plt.show()
 print(wd.round(1).to_dict())
 """)
-md("**What we learn:** weekends (especially Sunday) sell the most, July is the peak month, and sales grow each year. Holidays have only a small effect in this dataset.")
+md("**What we learn:** weekends (especially Sunday) sell the most, July is the peak month, and sales grow each year.")
 md("## 3. Feature engineering (see `src/features.py`)")
 code("""
 feat = make_features(df)
@@ -82,15 +80,7 @@ t = time.time(); lgb_model = M.train_lightgbm(train); preds["LightGBM"] = M.pred
 
 # Prophet: one model per store-item series (500 fits, run in parallel)
 t = time.time()
-# Prophet gets the same holiday calendar; in Pakistan mode Ramadan is a separate
-# "holiday" event (whole month) and the 7 days before each Eid count as a shopping rush.
-hdf = pd.DataFrame({"holiday": "holiday", "ds": holiday_calendar(df.date.min(), df.date.max())})
-if COUNTRY == "PK":
-    isl = islamic_dates(df.date.min().year, df.date.max().year + 1)
-    ram = pd.DataFrame({"holiday": "ramadan", "ds": isl.ramadan_start, "lower_window": 0, "upper_window": 29})
-    rush = pd.DataFrame({"holiday": "eid_rush", "ds": pd.concat([isl.eid_fitr, isl.eid_adha]).dropna(), "lower_window": -7, "upper_window": 0})
-    hdf = pd.concat([hdf.assign(lower_window=0, upper_window=0), ram, rush], ignore_index=True)
-pfc = M.prophet_forecast(train[["date","store","item","sales"]], sorted(test.date.unique()), hdf)
+pfc = M.prophet_forecast(train[["date","store","item","sales"]], sorted(test.date.unique()))
 p_test = test[["date","store","item"]].merge(pfc, on=["date","store","item"], how="left")
 preds["Prophet"] = p_test["yhat"].values; times["Prophet"] = time.time() - t
 """)
@@ -164,7 +154,7 @@ print("saved models/lgbm_models.joblib")
 """)
 md("""
 ## Next steps / ideas
-* Tune hyper-parameters with Optuna · retrain on real Lahore shop data, where the Pakistan calendar (Ramadan, Eid) should really matter
+* Tune hyper-parameters with Optuna · retrain on real shop data
 * Add price/promotion columns if your shop records them · try deep learning (N-BEATS, TFT)
 """)
 nb = nbf.v4.new_notebook(); nb["cells"] = cells

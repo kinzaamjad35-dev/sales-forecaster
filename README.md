@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/banner.png" alt="AI Sales Forecaster: demand forecasting and restock planning for Pakistani retailers" width="100%">
+  <img src="docs/banner.png" alt="AI Sales Forecaster: demand forecasting and restock planning for retailers" width="100%">
 </p>
 
 <p align="center">
@@ -33,15 +33,15 @@ through a multi-page web dashboard. Built by **Kinza Amjad**.
 </p>
 
 ## Why it matters
-Small and medium-sized retailers in Pakistan often make inventory decisions on intuition rather than data. Demand changes sharply around Ramadan, Eid ul-Fitr, Eid ul-Adha and national holidays, which leads to stock shortages at peak times and excess inventory afterwards. This project turns historical daily sales into accurate demand forecasts and a clear restocking plan that shows how much to order and when, using a built-in Pakistani holiday calendar.
+Small and medium-sized retailers often make inventory decisions on intuition rather than data. Demand varies with the day of the week, the season and long-term trends, which leads to stock shortages at peak times and excess inventory during quieter periods. This project turns historical daily sales into accurate demand forecasts and a clear restocking plan that shows how much to order and when.
 
-> **Honest note:** it is currently trained on a **public sample dataset** (Kaggle store-item sales, not Pakistani).
+> **Honest note:** it is currently trained on a **public sample dataset** (Kaggle store-item sales).
 > It has **not yet been used with a real shop's data**. The app accepts your own CSV, and that is the next step.
 
 ## Features
 - **5-model leaderboard**: naive (last year), 28-day moving average, Prophet, XGBoost, LightGBM
 - **Time-series cross-validation**: 3 expanding-window folds x 90 days
-- **Leak-free feature engineering**: lags, rolling stats, calendar, Pakistani holidays, Ramadan and Eid features (all at least 91 days old)
+- **Leak-free feature engineering**: lags, rolling stats, calendar features (all at least 91 days old)
 - **Prediction intervals**: 80% band from quantile LightGBM (coverage checked on test data)
 - **SHAP explanations**: which features drive the model
 - **Anomaly detection** on past sales (robust z-score / MAD)
@@ -71,7 +71,7 @@ Small and medium-sized retailers in Pakistan often make inventory decisions on i
 ```mermaid
 flowchart LR
     A[Sales CSV<br/>date, store, item, sales] --> B[Clean<br/>src/data.py]
-    B --> C[Features<br/>lags, rolling stats,<br/>holidays, Ramadan, Eid]
+    B --> C[Features<br/>lags, rolling stats,<br/>calendar]
     C --> D[Train and compare<br/>Naive, Moving avg,<br/>Prophet, XGBoost, LightGBM]
     D --> E[(Saved LightGBM<br/>point + quantile models)]
     E --> F[90-day forecast<br/>with 80% interval]
@@ -86,9 +86,9 @@ All numbers come from an actual run of the notebook on Python 3.12 with the pinn
 
 | Model | MAE | MAPE % | SMAPE % | Train+predict (s) |
 |---|---|---|---|---|
-| **LightGBM** | **5.90** | **12.91** | 12.42 | 8.8 |
-| XGBoost | 5.91 | 13.02 | 12.41 | 9.9 |
-| Prophet | 6.36 | 14.16 | 13.23 | 24.5 |
+| **LightGBM** | **5.90** | **12.93** | 12.42 | 10.3 |
+| XGBoost | 5.91 | 12.96 | 12.41 | 11.2 |
+| Prophet | 6.36 | 14.15 | 13.22 | 15.4 |
 | Naive (last year) | 8.35 | 17.69 | 17.87 | 0.0 |
 | Moving avg (28d) | 11.75 | 26.94 | 22.25 | 0.4 |
 
@@ -109,12 +109,12 @@ Copying last year's sales versus the LightGBM forecast, on a single series (stor
 
 | Model | MAE (mean ± std) | MAPE % (mean ± std) | SMAPE % (mean ± std) |
 |---|---|---|---|
-| LightGBM | 6.29 ± 0.34 | 11.95 ± 0.85 | 11.50 ± 0.80 |
-| XGBoost | 6.34 ± 0.38 | 12.04 ± 0.87 | 11.54 ± 0.76 |
+| LightGBM | 6.30 ± 0.35 | 11.94 ± 0.87 | 11.50 ± 0.80 |
+| XGBoost | 6.34 ± 0.38 | 12.02 ± 0.85 | 11.55 ± 0.76 |
 | Naive (last year) | 8.88 ± 0.47 | 16.27 ± 1.23 | 16.48 ± 1.20 |
 | Moving avg (28d) | 12.38 ± 1.70 | 22.20 ± 4.12 | 20.82 ± 3.03 |
 
-**80% prediction-interval coverage on the test set** (ideal = 80%): LightGBM quantile **78.9%**, Prophet **76.0%**.
+**80% prediction-interval coverage on the test set** (ideal = 80%): LightGBM quantile **79.3%**, Prophet **76.7%**.
 
 **Top SHAP features:** `lag_364` (same day last year), `roll_mean_364`, `lag_371`, `month`, `dayofweek`.
 
@@ -197,7 +197,7 @@ sales-forecaster/
 │   └── 5_Anomalies.py           # unusual sales days
 ├── src/
 │   ├── data.py                  # loading + cleaning
-│   ├── features.py              # feature engineering (PK holidays, Ramadan, Eid)
+│   ├── features.py              # feature engineering (lags, rolling stats, calendar)
 │   ├── models.py                # models, metrics, cross-validation
 │   ├── forecast.py              # forecasting + business tools
 │   └── app_utils.py             # shared Streamlit helpers
