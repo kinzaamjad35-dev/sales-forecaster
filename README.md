@@ -115,7 +115,7 @@ brew install libomp
 
 ### Install and run
 ```bash
-git clone https://github.com/<your-username>/sales-forecaster.git && cd sales-forecaster
+git clone https://github.com/kinzaamjad35-dev/sales-forecaster.git && cd sales-forecaster
 python3.12 -m venv .venv && source .venv/bin/activate     # Windows: .venv\Scripts\activate
 pip install -r requirements.txt          # add -r requirements-dev.txt for the notebook/Jupyter
 jupyter notebook notebooks/01_explore_and_model.ipynb  # optional: re-run training (~3 min)
