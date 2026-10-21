@@ -105,14 +105,6 @@ Copying last year's sales versus the LightGBM forecast, on a single series (stor
 
 <p align="center"><img src="docs/before_after.png" alt="Naive baseline vs LightGBM" width="95%"></p>
 
-### Ramadan and Eid effect
-This chart shows the **modelled** effect: the average SHAP contribution of the Ramadan and Eid features in the trained
-LightGBM model. The sample dataset is not Pakistani, so the model learns only a very small effect
-(+0.33 units/day in Ramadan against an average of 56 units/day). The features are there so that real data from a
-Lahore shop can show the true effect.
-
-<p align="center"><img src="docs/ramadan_eid_effect.png" alt="Modelled Ramadan and Eid effect" width="80%"></p>
-
 <details>
 <summary><b>More results: cross-validation, intervals, SHAP</b></summary>
 
