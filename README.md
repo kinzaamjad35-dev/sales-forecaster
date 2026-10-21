@@ -33,10 +33,7 @@ through a multi-page web dashboard. Built by **Kinza Amjad**.
 </p>
 
 ## Why it matters
-Most small retailers in Lahore and across Pakistan (kiryana stores, bakeries, clothing shops) restock by gut feeling.
-Demand swings around **Ramadan, Eid ul-Fitr, Eid ul-Adha** and public holidays, so shops either run out during the
-rush or get stuck with unsold stock afterwards. This project turns past daily sales into a forecast and a concrete
-"how much to order and when" plan, with a Pakistani holiday calendar built in.
+Small and medium-sized retailers in Pakistan often make inventory decisions on intuition rather than data. Demand changes sharply around Ramadan, Eid ul-Fitr, Eid ul-Adha and national holidays, which leads to stock shortages at peak times and excess inventory afterwards. This project turns historical daily sales into accurate demand forecasts and a clear restocking plan that shows how much to order and when, using a built-in Pakistani holiday calendar.
 
 > **Honest note:** it is currently trained on a **public sample dataset** (Kaggle store-item sales, not Pakistani).
 > It has **not yet been used with a real shop's data**. The app accepts your own CSV, and that is the next step.
