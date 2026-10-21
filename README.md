@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <b>Live demo:</b> coming soon (Streamlit Community Cloud deployment in progress)
+  <b>Live demo:</b> <a href="https://sales-forecaster-nesmftfrujdtyu8kwyba9h.streamlit.app">sales-forecaster-nesmftfrujdtyu8kwyba9h.streamlit.app</a>
 </p>
 
 <table align="center">
