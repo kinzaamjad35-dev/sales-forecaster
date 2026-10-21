@@ -48,7 +48,7 @@ def pretrained_models():
 def sidebar_data_picker():
     """Shown on every page: choose sample data or upload a CSV."""
     with st.sidebar:
-        st.header("📂 Data")
+        st.header("Data")
         up = st.file_uploader("Upload CSV (date, item, sales [, store])", type="csv")
         if up is not None:
             st.session_state["upload"] = up.getvalue()

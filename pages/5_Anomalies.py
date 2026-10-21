@@ -5,8 +5,8 @@ import streamlit as st
 from src.app_utils import get_data_and_models
 from src.forecast import detect_anomalies
 
-st.set_page_config(page_title="Anomalies", page_icon="🚨", layout="wide")
-st.title("🚨 Anomaly Detection")
+st.set_page_config(page_title="Anomalies", layout="wide")
+st.title("Anomaly Detection")
 df, _ = get_data_and_models()
 c = st.columns(3)
 store = c[0].selectbox("Store", sorted(df["store"].unique()))

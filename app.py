@@ -11,8 +11,8 @@ import streamlit as st
 
 from src.app_utils import get_data_and_models
 
-st.set_page_config(page_title="AI Sales Forecaster", page_icon="📈", layout="wide")
-st.title("📈 AI Sales Forecaster")
+st.set_page_config(page_title="AI Sales Forecaster", layout="wide")
+st.title("AI Sales Forecaster")
 st.caption("Forecast demand, compare models, and plan inventory. Pages in the sidebar →")
 
 df, models = get_data_and_models()

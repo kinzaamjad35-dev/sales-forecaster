@@ -7,7 +7,7 @@ def md(s): cells.append(nbf.v4.new_markdown_cell(s.strip()))
 def code(s): cells.append(nbf.v4.new_code_cell(s.strip()))
 
 md("""
-# 🛒 AI Sales Forecasting — Explore & Model
+# AI Sales Forecasting — Explore & Model
 **Goal:** predict how many units of each item each store will sell over the next 90 days,
 and check which model does it best.
 

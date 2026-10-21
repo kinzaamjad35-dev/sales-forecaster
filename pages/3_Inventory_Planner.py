@@ -7,8 +7,8 @@ from src.app_utils import get_data_and_models, cached_forecast, data_key, series
 from src.forecast import inventory_plan, to_excel_bytes
 import pandas as pd
 
-st.set_page_config(page_title="Inventory Planner", page_icon="📦", layout="wide")
-st.title("📦 Inventory Planner")
+st.set_page_config(page_title="Inventory Planner", layout="wide")
+st.title("Inventory Planner")
 df, models = get_data_and_models()
 store, item, horizon = series_picker(df, "inv_")
 c = st.columns(3)
@@ -25,9 +25,9 @@ m[1].metric("Safety stock", f"{plan['safety_stock']:,.0f}")
 m[2].metric("Reorder point", f"{plan['reorder_point']:,.0f}")
 m[3].metric("Suggested order", f"{plan['order_quantity']:,.0f}")
 if plan["reorder_now"]:
-    st.error(f"⚠️ Stock ({stock}) is at or below the reorder point – order now. Covers ~{plan['days_of_cover']:.1f} days.")
+    st.error(f"Stock ({stock}) is at or below the reorder point – order now. Covers ~{plan['days_of_cover']:.1f} days.")
 else:
-    st.success(f"✅ Stock covers ~{plan['days_of_cover']:.1f} days; above the reorder point.")
+    st.success(f"Stock covers ~{plan['days_of_cover']:.1f} days; above the reorder point.")
 
 st.markdown(f"""
 **How it's calculated**

@@ -6,8 +6,8 @@ import streamlit as st
 from src.app_utils import get_data_and_models, cached_forecast, data_key, series_picker
 from src.forecast import apply_scenario
 
-st.set_page_config(page_title="What-If Scenarios", page_icon="🧪", layout="wide")
-st.title("🧪 What-If Scenarios")
+st.set_page_config(page_title="What-If Scenarios", layout="wide")
+st.title("What-If Scenarios")
 st.caption("The model has no price/promotion data, so these are simple rule-based adjustments on top of the forecast.")
 df, models = get_data_and_models()
 store, item, horizon = series_picker(df, "wi_")

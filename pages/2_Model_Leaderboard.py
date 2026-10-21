@@ -5,8 +5,8 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-st.set_page_config(page_title="Model Leaderboard", page_icon="🏆", layout="wide")
-st.title("🏆 Model Leaderboard")
+st.set_page_config(page_title="Model Leaderboard", layout="wide")
+st.title("Model Leaderboard")
 MD = Path(__file__).resolve().parent.parent / "models"
 IMG = MD.parent / "images"
 
@@ -34,7 +34,7 @@ if (MD / "interval_coverage.csv").exists():
     c[1].metric("Prophet 80% interval coverage", f"{cov['prophet_coverage_pct']:.1f}%")
     st.caption("Ideal = 80%: that many actual days should fall inside the band.")
 
-st.subheader("🧠 SHAP: what drives the LightGBM forecast?")
+st.subheader("SHAP: what drives the LightGBM forecast?")
 imp = pd.read_csv(MD / "shap_importance.csv").head(15)
 st.plotly_chart(px.bar(imp[::-1], x="mean_abs_shap", y="feature", orientation="h"), width="stretch")
 if (IMG / "shap_summary.png").exists():

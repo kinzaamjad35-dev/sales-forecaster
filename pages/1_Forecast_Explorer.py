@@ -7,8 +7,8 @@ import streamlit as st
 from src.app_utils import get_data_and_models, cached_forecast, data_key
 from src.forecast import hierarchical_rollup, to_excel_bytes
 
-st.set_page_config(page_title="Forecast Explorer", page_icon="🔮", layout="wide")
-st.title("🔮 Forecast Explorer")
+st.set_page_config(page_title="Forecast Explorer", layout="wide")
+st.title("Forecast Explorer")
 df, models = get_data_and_models()
 
 level = st.radio("Level", ["Item (one store)", "Store (all its items)", "Total (all stores)"], horizontal=True)
@@ -51,7 +51,7 @@ if roll == "store":
     st.subheader("Item breakdown")
     st.dataframe(fc.groupby("item", as_index=False)[["forecast", "lower", "upper"]].sum().round(0), width="stretch")
 
-st.subheader("⬇️ Export")
+st.subheader("Export")
 out = fc_r.round({c: 2 for c in fc_r.select_dtypes('number')})
 e1, e2 = st.columns(2)
 e1.download_button("Download CSV", out.to_csv(index=False), "forecast.csv", "text/csv")
