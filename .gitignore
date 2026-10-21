@@ -1,0 +1,20 @@
+# Python junk
+__pycache__/
+*.py[cod]
+.venv*/
+.env
+*.log
+.idea/
+.vscode/
+venv/
+.ipynb_checkpoints/
+# Streamlit secrets / OS files
+.streamlit/secrets.toml
+.DS_Store
+# Exports you download from the app
+forecast*.csv
+forecast*.xlsx
+inventory_plan*.xlsx
+scenario*.csv
+# Trained model file is 11 MB; uncomment to keep it out of git (the app retrains if missing)
+# models/*.joblib

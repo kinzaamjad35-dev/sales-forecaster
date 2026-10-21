@@ -1,0 +1,5 @@
+model,MAE mean,MAE std,MAPE % mean,MAPE % std,SMAPE % mean,SMAPE % std
+LightGBM,6.291,0.344,11.945,0.845,11.497,0.8
+XGBoost,6.34,0.379,12.042,0.869,11.541,0.758
+Naive (last year),8.885,0.465,16.271,1.231,16.477,1.204
+Moving avg (28d),12.379,1.7,22.205,4.12,20.815,3.033

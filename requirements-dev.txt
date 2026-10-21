@@ -1,0 +1,5 @@
+-r requirements.txt
+nbformat==5.11.1
+nbconvert
+ipykernel
+jupyter
