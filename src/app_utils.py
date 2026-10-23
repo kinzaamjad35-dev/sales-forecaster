@@ -10,7 +10,7 @@ import joblib
 import pandas as pd
 import streamlit as st
 
-from .data import load_sales, clean_sales, SAMPLE_PATH
+from .data import load_sales, clean_sales, cap_outliers, SAMPLE_PATH
 from .features import make_features
 from . import models as M
 from .forecast import forecast_future
@@ -31,10 +31,11 @@ def uploaded_data(file_bytes: bytes):
 
 
 @st.cache_resource(show_spinner="Training models on your data (about a minute)…")
-def train_models(_df, key: str):
+def train_models(_df, key: str, cap: bool = True):
     """Train point + 10%/90% quantile LightGBM models. `key` tells the cache
-    which dataset this is (the underscore stops Streamlit hashing a big table)."""
-    feat = make_features(_df)
+    which dataset this is (the underscore stops Streamlit hashing a big table).
+    cap=True winsorizes extreme one-off days first (see data.cap_outliers)."""
+    feat = make_features(cap_outliers(_df) if cap else _df)
     return {"point": M.train_lightgbm(feat),
             "lower": M.train_lightgbm(feat, objective="quantile", alpha=0.1),
             "upper": M.train_lightgbm(feat, objective="quantile", alpha=0.9)}
@@ -60,6 +61,9 @@ def sidebar_data_picker():
                 st.rerun()
         else:
             st.caption("Using Kaggle sample: 10 stores × 50 items, 2013–2017")
+        st.toggle("Cap extreme spikes before forecasting", value=True, key="cap_outliers",
+                  help="Clips one-off days far from the usual level (e.g. a single bulk order) so they don't "
+                       "inflate the forecast. Spikes still show on the Anomalies page.")
 
 
 def get_data_and_models():
@@ -69,7 +73,7 @@ def get_data_and_models():
             df = uploaded_data(st.session_state["upload"])
             if df["date"].nunique() < 400:
                 st.warning("Less than ~400 days of history: the yearly features will be mostly empty, so forecasts will be rough.")
-            return df, train_models(df, key=str(hash(st.session_state["upload"])))
+            return df, train_models(df, key=str(hash(st.session_state["upload"])), cap=capping_on())
         except (ValueError, pd.errors.ParserError) as e:
             st.error(f"Could not use **{st.session_state['upload_name']}**: {e}")
             st.stop()
@@ -80,16 +84,25 @@ def get_data_and_models():
 
 
 @st.cache_data(show_spinner="Forecasting…")
-def cached_forecast(_df, _models, key, store, item, horizon):
+def cached_forecast(_df, _models, key, store, item, horizon, cap=None):
     """Forecast one store-item series (or all, if store/item is None)."""
     h = _df
     if store is not None: h = h[h["store"] == store]
     if item is not None: h = h[h["item"] == item]
+    if cap is None:
+        cap = capping_on()
+    if cap:
+        h = cap_outliers(h)
     return forecast_future(h, _models["point"], _models["lower"], _models["upper"], horizon=horizon)
 
 
+def capping_on():
+    return bool(st.session_state.get("cap_outliers", True))
+
+
 def data_key():
-    return str(hash(st.session_state["upload"])) if "upload" in st.session_state else "sample"
+    base = str(hash(st.session_state["upload"])) if "upload" in st.session_state else "sample"
+    return base + ("|cap" if capping_on() else "|raw")
 
 
 def series_picker(df, prefix=""):

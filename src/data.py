@@ -125,3 +125,27 @@ def clean_sales(df: pd.DataFrame) -> pd.DataFrame:
     # Small number types save memory (the sample has ~913,000 rows).
     df["sales"] = df["sales"].astype("float32")
     return df.sort_values(["store", "item", "date"]).reset_index(drop=True)
+
+
+def cap_outliers(df: pd.DataFrame, k: float = 5.0, window: int = 28) -> pd.DataFrame:
+    """Cap (winsorize) extreme one-off days per store-item series before training.
+
+    A day is extreme if it is more than `k` robust deviations (1.4826 x MAD)
+    above or below the rolling median of the surrounding `window` days. Such
+    days are clipped to median +/- k deviations, not deleted, so one bulk
+    order of 5,000 units doesn't inflate a year of averages and lags. The
+    anomaly page still uses the raw data, so the spikes remain visible.
+    """
+    out = df.sort_values(["store", "item", "date"]).copy()
+    g = out.groupby(["store", "item"], sort=False)["sales"]
+    med = g.transform(lambda s: s.rolling(window, center=True, min_periods=7).median())
+    med = med.fillna(g.transform("median"))
+    dev = (out["sales"] - med).abs()
+    mad = dev.groupby([out["store"], out["item"]], sort=False).transform(
+        lambda s: s.rolling(window, center=True, min_periods=7).median())
+    mad = mad.fillna(dev.groupby([out["store"], out["item"]]).transform("median"))
+    # Floor the spread so near-constant or low-volume series aren't over-capped.
+    scale = np.maximum(1.4826 * mad, np.maximum(1.0, 0.1 * med.abs()))
+    lo, hi = (med - k * scale).clip(lower=0), med + k * scale
+    out["sales"] = out["sales"].clip(lo, hi).astype(df["sales"].dtype)
+    return out.reset_index(drop=True)
