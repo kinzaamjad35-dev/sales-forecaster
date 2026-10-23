@@ -66,10 +66,20 @@ XGB_PARAMS = dict(n_estimators=600, learning_rate=0.05, max_depth=8,
                   subsample=0.8, colsample_bytree=0.8, tree_method="hist", n_jobs=-1)
 
 
+MIN_HISTORY_DAYS = 92 + 28   # 91-day lag + a few weeks of training rows
+
+
 def _clean_train(train):
     # The first ~2 years have no 728-day lag; trees handle NaN, but rows with
     # no history at all are useless, so we drop rows missing the 364-day lag.
-    return train.dropna(subset=["lag_364"])
+    # With under a year of data that would leave nothing, so fall back to
+    # rows that have at least the 91-day lag (rougher, but it works).
+    tr = train.dropna(subset=["lag_364"])
+    if len(tr) < 100:
+        tr = train.dropna(subset=["lag_91", "sales"])
+    if tr.empty:
+        raise ValueError(f"Not enough history to train: each series needs at least ~{MIN_HISTORY_DAYS} days of sales.")
+    return tr
 
 
 def train_lightgbm(train, objective="regression", alpha=None, **kw):

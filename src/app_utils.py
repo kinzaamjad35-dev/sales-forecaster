@@ -27,7 +27,7 @@ def sample_data():
 @st.cache_data(show_spinner="Reading your CSV…")
 def uploaded_data(file_bytes: bytes):
     import io
-    return clean_sales(pd.read_csv(io.BytesIO(file_bytes)))
+    return load_sales(io.BytesIO(file_bytes))
 
 
 @st.cache_resource(show_spinner="Training models on your data (about a minute)…")
@@ -65,10 +65,14 @@ def sidebar_data_picker():
 def get_data_and_models():
     sidebar_data_picker()
     if "upload" in st.session_state:
-        df = uploaded_data(st.session_state["upload"])
-        if df["date"].nunique() < 400:
-            st.warning("Less than ~400 days of history: the yearly features will be mostly empty, so forecasts will be rough.")
-        return df, train_models(df, key=str(hash(st.session_state["upload"])))
+        try:
+            df = uploaded_data(st.session_state["upload"])
+            if df["date"].nunique() < 400:
+                st.warning("Less than ~400 days of history: the yearly features will be mostly empty, so forecasts will be rough.")
+            return df, train_models(df, key=str(hash(st.session_state["upload"])))
+        except (ValueError, pd.errors.ParserError) as e:
+            st.error(f"Could not use **{st.session_state['upload_name']}**: {e}")
+            st.stop()
     df = sample_data()
     if MODEL_PATH.exists():
         return df, pretrained_models()
